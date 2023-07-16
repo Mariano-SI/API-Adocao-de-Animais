@@ -15,15 +15,14 @@ class CadAnimal{
         connection.connect();
         return connection;
     }
-    //Retorna lista de carros
+
     static getAnimal(res){
         const connection = CadAnimal.connect();
         connection.beginTransaction();
         try {
             const sql = "select * from cadAnimal";
 
-            const query = connection.query(sql, function(error, results, fields){
-                if(error) throw error;
+            connection.query(sql, function(error, results, fields){
                 return res.status(200).send(results);
             });
             connection.commit();
@@ -92,7 +91,7 @@ class CadAnimal{
         const connection = CadAnimal.connect();
         const {nome, especie, porte, sexo, idade, descricao} = animal;
         
-       const sql = `INSERT INTO cadAnimal ( nome, especie, porte,sexo, idade, descricao ) values ( '${nome}', '${especie}', '${porte}', '${sexo}', ${idade}, '${descricao}')`; 
+       const sql = `INSERT INTO cadAnimal ( id, nome, especie, porte,sexo, idade, descricao ) values ( ${id}'${nome}', '${especie}', '${porte}', '${sexo}', ${idade}, '${descricao}')`; 
         const query = connection.query(sql, function(error, results, fields){
             if(error) throw error;
         });
