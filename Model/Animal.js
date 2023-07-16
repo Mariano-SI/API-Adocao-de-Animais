@@ -93,36 +93,31 @@ class CadAnimal{
         }
     }
 
-    static updateAdotante(req, res){
-        const connection = Adotante.connect();
-        const cpf = req.params.cpf;
-        const {nome, sobrenome, rua, cidade, estado, nCasa, telefone} = req.body;
+    static updateAnimal(req, res){
+        const connection = CadAnimal.connect();
+        const id = req.params.id;
+        const {nome, idade, porte, sexo, especie, } = req.body;
 
         try {
-            const setStatementCollumns = [] //copiei da Round, gostei.
+            const setStatementCollumns = [] 
 
             if(nome){
                 setStatementCollumns.push(`nome = '${nome}'`)
             }
-            if(sobrenome){
-                setStatementCollumns.push(`sobrenome = '${sobrenome}'`)
+            if(idade){
+                setStatementCollumns.push(`idade = ${idade}`)
             }
-            if (rua) {
-                setStatementCollumns.push(`rua = '${rua}'`)
+            if (porte) {
+                setStatementCollumns.push(`porte = '${porte}'`)
             }
-            if(cidade){
-                setStatementCollumns.push(`cidade = '${cidade}'`)
-            }if(estado){
-                setStatementCollumns.push(`estado = '${estado}'`)
-            }if(nCasa){
-                setStatementCollumns.push(`nCasa = ${nCasa}`)
-            }if(telefone){
-                setStatementCollumns.push(`telefone = '${telefone}'`)
+            if(sexo){
+                setStatementCollumns.push(`sexo = '${sexo}'`)
+            }if(especie){
+                setStatementCollumns.push(`especie = '${especie}'`)
             }
-
-            const sql = `UPDATE adotante SET ${setStatementCollumns.join(",")} where cpf = ${cpf}`;
+            const sql = `UPDATE animal SET ${setStatementCollumns.join(",")} where id = ${id}`;
             connection.query(sql, function(){
-                return res.status(200).send({msg:"Atualizado com sucesso!"});
+                return res.status(200).send({msg:"Registro do animal atualizado com sucesso!"});
             })
             connection.commit()
         } catch (error) {
