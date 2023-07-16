@@ -7,26 +7,15 @@ router.get('/home', function(req,res){
 });
 
 //busca todos os animais
-router.get('/', function(req,res){
-    CadAnimal.getAnimal(res)
-})
+router.get('/', (req,res)=>CadAnimal.getAnimais(res))
 
 //busca animal por id
-router.get('/:id', function(req,res){
-    const id = req.params.id;
-    CadAnimal.getAnimalById(id, function(animal){
-        res.json(animal)
-    })
-})
+router.get('/:id', (req, res)=> CadAnimal.getAnimalById(req, res))
 
 //post para salvar um animal
-router.post('/', function(req,res){
-    
-    const animal = req.body;
-    CadAnimal.createAnimal(animal, function(animal){
-        res.json({msg:"Animal inserido com sucesso"});
-    })
-})
+router.post('/', (req,res)=> CadAnimal.createAnimal(req, res))
+
+router.delete('/:id', (req,res)=>CadAnimal.deleteAnimalById(req,res))
 //put para atualizar um animal
 router.put('/:id', function(req,res){
     const id = req.params.id;

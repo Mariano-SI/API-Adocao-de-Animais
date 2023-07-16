@@ -9,19 +9,18 @@ class CadAnimal{
             host:'bd2-ufvjm.mysql.database.azure.com',
             user:'Mariano',
             password:'m-88443244',
-            database:'trabbd',
+            database:'ongAnimal',
         });
         //Conecta ao banco
         connection.connect();
         return connection;
     }
 
-    static getAnimal(res){
+    static getAnimais(res){
         const connection = CadAnimal.connect();
         connection.beginTransaction();
         try {
-            const sql = "select * from cadAnimal";
-
+            const sql = "select * from animal";
             connection.query(sql, function(error, results, fields){
                 return res.status(200).send(results);
             });
@@ -34,73 +33,105 @@ class CadAnimal{
         }
     }
 
-    //Retorna a lista de carros por tipo de banco de dado
-    static getAnimalById(id, callback){
+    
+    static getAnimalById(req, res){
+        const id = req.params.id;
         const connection = CadAnimal.connect();
-
-        //Consulta
-        const sql= `select * from cadAnimal left join resgateAnimal on cadAnimal.id = resgateAnimal.id_animal left join adocao on cadAnimal.id = adocao.id_animal where cadAnimal.id = ${id}`;
-        const query = connection.query(sql, function(error, results, fields){
-            if(error) throw error;
-            //Retorna os dados pela callback
-            callback(results);
-        });
-        console.log(query.sql);
-        connection.end();
+        connection.beginTransaction();
+        try {
+            const sql = `CALL spDadosAnimal(?)`;
+            connection.query(sql, [id], function(error, results, fields){
+                return res.status(200).send(results[0]);
+             })
+             connection.commit();
+        } catch (error) {
+            connection.rollback();
+            throw new Error("Erro com servidor", 500)
+        }finally{
+            connection.end();
+        }
     }
 
-        //Atualiza o carro no BD
-        static updateAnimal(id, {nome, especie, porte, sexo, idade, descricao}, callback){
-            const connection = CadAnimal.connect();
+    static createAnimal(req, res){
+        const animalInfo = req.body;
+        const connection = CadAnimal.connect();
 
+        connection.beginTransaction()
+        try {
+            const {nome, idade, porte, sexo, especie, data_resgate, nome_resgatante} = animalInfo;
+            const parameters = [nome, idade, porte, sexo, especie, data_resgate, nome_resgatante];
+        
+            const sql = `CALL spCadAnimal(?,?,?,?,?,?,?)`; 
+
+            connection.query(sql, parameters, function(){
+                return res.status(200).send({msg:"Animal cadastrado com sucesso"});
+             });
+             connection.commit()
+        } catch (error) {
+            connection.rollback()
+            throw new Error("Erro com servidor", 500)
+        }finally{
+            connection.end();
+        }
+    }
+
+    static deleteAnimalById(req, res){
+        const connection = CadAnimal.connect();
+        const id = req.params.id;
+        connection.beginTransaction();
+        try {
+            const sql = `DELETE FROM animal where id = ${id}`;
+            connection.query(sql, function(){
+                return res.status(200).send({msg:"Animal deletado com sucesso!"});
+             })
+             connection.commit();
+        } catch (error) {
+            connection.rollback();
+            throw new Error("Erro com servidor", 500)
+        }finally{
+            connection.end();
+        }
+    }
+
+    static updateAdotante(req, res){
+        const connection = Adotante.connect();
+        const cpf = req.params.cpf;
+        const {nome, sobrenome, rua, cidade, estado, nCasa, telefone} = req.body;
+
+        try {
             const setStatementCollumns = [] //copiei da Round, gostei.
 
             if(nome){
                 setStatementCollumns.push(`nome = '${nome}'`)
             }
-            if(especie){
-                setStatementCollumns.push(`especie = '${especie}'`)
+            if(sobrenome){
+                setStatementCollumns.push(`sobrenome = '${sobrenome}'`)
             }
-            if (porte) {
-                setStatementCollumns.push(`porte = '${porte}'`)
+            if (rua) {
+                setStatementCollumns.push(`rua = '${rua}'`)
             }
-            if(sexo){
-                setStatementCollumns.push(`sexo = '${sexo}'`)
-            }if(idade){
-                setStatementCollumns.push(`idade = ${idade}`)
-            }if(descricao){
-                setStatementCollumns.push(`descricao = '${descricao}'`)
+            if(cidade){
+                setStatementCollumns.push(`cidade = '${cidade}'`)
+            }if(estado){
+                setStatementCollumns.push(`estado = '${estado}'`)
+            }if(nCasa){
+                setStatementCollumns.push(`nCasa = ${nCasa}`)
+            }if(telefone){
+                setStatementCollumns.push(`telefone = '${telefone}'`)
             }
 
-            const sql = `UPDATE cadAnimal SET ${setStatementCollumns.join(",")} where id = ${id}`;
-            const query= connection.query(sql, function(error, results, fields){
-                if(error) throw error;
-                callback(results);
+            const sql = `UPDATE adotante SET ${setStatementCollumns.join(",")} where cpf = ${cpf}`;
+            connection.query(sql, function(){
+                return res.status(200).send({msg:"Atualizado com sucesso!"});
             })
-    
-            console.log(query.sql);
+            connection.commit()
+        } catch (error) {
+            connection.rollback();
+            throw new Error("Erro no servidor", 500);
+        }finally{
             connection.end();
-    
-        }
-
-        
-   
-
-
-    static  createAnimal(animal, callback){
-        const connection = CadAnimal.connect();
-        const {nome, especie, porte, sexo, idade, descricao} = animal;
-        
-       const sql = `INSERT INTO cadAnimal ( id, nome, especie, porte,sexo, idade, descricao ) values ( ${id}'${nome}', '${especie}', '${porte}', '${sexo}', ${idade}, '${descricao}')`; 
-        const query = connection.query(sql, function(error, results, fields){
-            if(error) throw error;
-        });
-
-        console.log(query.sql); 
-        connection.end();
+        }         
     }
-
-
 }
 
 module.exports = CadAnimal;
