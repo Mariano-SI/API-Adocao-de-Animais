@@ -8,16 +8,14 @@ router.get('/home', function(req,res){
 
 //busca todos os animais
 router.get('/', function(req,res){
-    CadAnimal.getAnimal(function(carros){
-        res.json(carros)
-    })
+    CadAnimal.getAnimal(res)
 })
 
 //busca animal por id
 router.get('/:id', function(req,res){
     const id = req.params.id;
-    CadAnimal.getAnimalById(id, function(carro){
-        res.json(carro)
+    CadAnimal.getAnimalById(id, function(animal){
+        res.json(animal)
     })
 })
 
@@ -25,8 +23,8 @@ router.get('/:id', function(req,res){
 router.post('/', function(req,res){
     
     const animal = req.body;
-    CadAnimal.createAnimal(animal, function(carro){
-        res.json({msg:"Carro inserido com sucesso"});
+    CadAnimal.createAnimal(animal, function(animal){
+        res.json({msg:"Animal inserido com sucesso"});
     })
 })
 //put para atualizar um animal

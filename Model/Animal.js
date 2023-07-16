@@ -16,18 +16,23 @@ class CadAnimal{
         return connection;
     }
     //Retorna lista de carros
-    static getAnimal(callback){
+    static getAnimal(res){
         const connection = CadAnimal.connect();
-        //Cria uma consulta
-        const sql = "select * from cadAnimal";
-        const query = connection.query(sql, function(error, results, fields){
-            if(error) throw error;
-            //Retorna os dados pela callback
-            callback(results);
-        });
+        connection.beginTransaction();
+        try {
+            const sql = "select * from cadAnimal";
 
-        console.log(query.sql);
-        connection.end()
+            const query = connection.query(sql, function(error, results, fields){
+                if(error) throw error;
+                return res.status(200).send(results);
+            });
+            connection.commit();
+        } catch (error) {
+            connection.rollback();
+            throw new Error("Não foi possivel concluir a transação", 500);
+        }finally{
+            connection.end();
+        }
     }
 
     //Retorna a lista de carros por tipo de banco de dado
