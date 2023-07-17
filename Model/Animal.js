@@ -1,11 +1,11 @@
-//importa o modulo do mysql
-const mysql = require('mysql');
 const Database = require('../Database/Database');
 
 class CadAnimal{
-    static getAnimais(res){
-        this.dbthis.dbConnection = Database.connect();
-        this.dbthis.dbConnection.beginTransaction();
+
+    constructor(){
+        this.dbConnection = Database.connect();
+    }
+    getAnimais(res){
         this.dbConnection.beginTransaction();
         try {
             const sql = "select * from animal";
@@ -21,10 +21,9 @@ class CadAnimal{
         }
     }
 
-    static getAnimalById(req, res){
+    getAnimalById(req, res){
         const id = req.params.id;
 
-        this.dbConnection = CadAnimal.connect();
         this.dbConnection.beginTransaction();
 
         try {
@@ -41,9 +40,8 @@ class CadAnimal{
         }
     }
 
-    static createAnimal(req, res){
+    createAnimal(req, res){
         const animalInfo = req.body;
-        this.dbConnection = CadAnimal.connect();
 
         this.dbConnection.beginTransaction()
         try {
@@ -64,8 +62,7 @@ class CadAnimal{
         }
     }
 
-    static deleteAnimalById(req, res){
-        this.dbConnection = CadAnimal.connect();
+    deleteAnimalById(req, res){
 
         const id = req.params.id;
 
@@ -84,8 +81,7 @@ class CadAnimal{
         }
     }
 
-    static updateAnimal(req, res){
-        this.dbConnection = CadAnimal.connect();
+    updateAnimal(req, res){
 
         const id = req.params.id;
         const {nome, idade, porte, sexo, especie, } = req.body;

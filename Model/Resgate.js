@@ -2,8 +2,12 @@ const mysql = require('mysql');
 const Database = require('../Database/Database');
 
 class Resgate{
-    static createResgate(resgate, callback){
+
+    constructor(){
         this.dbConnection = Database.connect();
+    }
+    createResgate(resgate, callback){
+
         this.dbConnection.beginTransaction();
         const {id_animal, nome_resgatante, data_resgate, situacao_resgate} = resgate;
         

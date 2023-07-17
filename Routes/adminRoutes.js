@@ -3,9 +3,10 @@ const router = express.Router();
 const Admin = require('../Model/Admin')
 
 
+const admin = new Admin();
 
 router.get('/', function(req,res){
-    Admin.getAdmins(res)
+    admin.getAdmins(res)
 })
 
 module.exports = router;
