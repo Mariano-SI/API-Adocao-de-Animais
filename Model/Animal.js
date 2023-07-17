@@ -4,9 +4,9 @@ const Database = require('../Database/Database');
 
 class CadAnimal{
     static getAnimais(res){
-        this.dbthis.dbConnection = Database.connect();
-        this.dbthis.dbConnection.beginTransaction();
+        this.dbConnection = Database.connect();
         this.dbConnection.beginTransaction();
+
         try {
             const sql = "select * from animal";
             this.dbConnection.query(sql, function(error, results, fields){
@@ -24,7 +24,7 @@ class CadAnimal{
     static getAnimalById(req, res){
         const id = req.params.id;
 
-        this.dbConnection = CadAnimal.connect();
+        this.dbConnection = Database.connect();
         this.dbConnection.beginTransaction();
 
         try {
@@ -43,9 +43,9 @@ class CadAnimal{
 
     static createAnimal(req, res){
         const animalInfo = req.body;
-        this.dbConnection = CadAnimal.connect();
+        this.dbConnection = Database.connect();
+        this.dbConnection.beginTransaction();
 
-        this.dbConnection.beginTransaction()
         try {
             const {nome, idade, porte, sexo, especie, data_resgate, nome_resgatante} = animalInfo;
             const parameters = [nome, idade, porte, sexo, especie, data_resgate, nome_resgatante];
@@ -65,14 +65,13 @@ class CadAnimal{
     }
 
     static deleteAnimalById(req, res){
-        this.dbConnection = CadAnimal.connect();
-
+        this.dbConnection = Database.connect();
         const id = req.params.id;
 
         this.dbConnection.beginTransaction();
         try {
-            const sql = `DELETE FROM animal where id = ${id}`;
-            this.dbConnection.query(sql, function(){
+            const sql = `CALL spDeleteAnimalById(?)`;
+            this.dbConnection.query(sql, [id], function(){
                 return res.status(200).send({msg:"Animal deletado com sucesso!"});
              })
              this.dbConnection.commit();

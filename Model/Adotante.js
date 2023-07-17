@@ -66,8 +66,8 @@ class Adotante{
         this.dbConnection.beginTransaction();
 
         try {
-            const sql = `Delete * FROM adotante where cpf = ${cpf}`;
-            this.dbConnection.query(sql, function(){
+            const sql = `CALL spDeleteAdotanteByID(?)`;
+            this.dbConnection.query(sql, [cpf], function(){
                 return res.status(200).send({msg:"Deletado com sucesso!"});
              })
              this.dbConnection.commit();
