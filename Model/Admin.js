@@ -2,10 +2,11 @@ const mysql = require('mysql');
 const Database = require('../Database/Database')
 
 class Admin{
-    static getAdmins(res){
+    constructor(){
         this.dbConnection = Database.connect();
+    }
+    getAdmins(res){
         this.dbConnection.beginTransaction();
-
         try {
             const sql = "select * from t_admin";
             this.dbConnection.query(sql, function(error, results, fields){

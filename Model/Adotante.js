@@ -2,9 +2,12 @@ const mysql = require('mysql');
 const Database = require('../Database/Database')
 class Adotante{
     
-    
-    static getAllAdotantes(req,res){
-        this.dbConnection = Database.connect();
+    constructor(){
+            this.dbConnection = Database.connect();
+    }
+
+     getAllAdotantes(req,res){
+        
         this.dbConnection.beginTransaction();
         try {
             const sql = "SELECT * FROM adotante";
@@ -20,9 +23,9 @@ class Adotante{
         }
     }
 
-    static getAdotantesByCPF(req, res){
+     getAdotantesByCPF(req, res){
         const cpf = req.params.cpf;
-        this.dbConnection = Database.connect();
+        
         this.dbConnection.beginTransaction();
         try {
             const sql = `SELECT * FROM adotante where cpf = ${cpf}`;
@@ -38,10 +41,10 @@ class Adotante{
         }
     }
 
-    static createAdotante(req, res){
+     createAdotante(req, res){
         const adotanteInfo = req.body;
 
-        this.dbConnection = Database.connect();
+        
         this.dbConnection.beginTransaction();
         try {
             const {cpf, nome, sobrenome, rua, cidade, estado, nCasa, telefone} = adotanteInfo;
@@ -60,9 +63,9 @@ class Adotante{
         }
     }
 
-    static deleteAdotantesByCPF(req, res){
+     deleteAdotantesByCPF(req, res){
         const cpf = req.params.cpf;
-        this.dbConnection = Database.connect();
+        
         this.dbConnection.beginTransaction();
 
         try {
@@ -79,8 +82,8 @@ class Adotante{
         }
     }
 
-    static updateAdotante(req, res){
-        this.dbConnection = Database.connect();
+     updateAdotante(req, res){
+        
         
         const cpf = req.params.cpf;
         const {nome, sobrenome, rua, cidade, estado, nCasa, telefone} = req.body;
