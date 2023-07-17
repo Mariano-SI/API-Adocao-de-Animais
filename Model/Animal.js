@@ -1,100 +1,92 @@
 //importa o modulo do mysql
 const mysql = require('mysql');
+const Database = require('../Database/Database');
 
 class CadAnimal{
-    //Função para conectar o BD
-    static connect(){
-        //Cria conexao
-        const connection = mysql.createConnection({
-            host:'bd2-ufvjm.mysql.database.azure.com',
-            user:'Mariano',
-            password:'m-88443244',
-            database:'ongAnimal',
-        });
-        //Conecta ao banco
-        connection.connect();
-        return connection;
-    }
-
     static getAnimais(res){
-        const connection = CadAnimal.connect();
-        connection.beginTransaction();
+        this.dbthis.dbConnection = Database.connect();
+        this.dbthis.dbConnection.beginTransaction();
+        this.dbConnection.beginTransaction();
         try {
             const sql = "select * from animal";
-            connection.query(sql, function(error, results, fields){
+            this.dbConnection.query(sql, function(error, results, fields){
                 return res.status(200).send(results);
             });
-            connection.commit();
+            this.dbConnection.commit();
         } catch (error) {
-            connection.rollback();
+            this.dbConnection.rollback();
             throw new Error("Não foi possivel concluir a transação", 500);
         }finally{
-            connection.end();
+            this.dbConnection.end();
         }
     }
 
-    
     static getAnimalById(req, res){
         const id = req.params.id;
-        const connection = CadAnimal.connect();
-        connection.beginTransaction();
+
+        this.dbConnection = CadAnimal.connect();
+        this.dbConnection.beginTransaction();
+
         try {
             const sql = `CALL spDadosAnimal(?)`;
-            connection.query(sql, [id], function(error, results, fields){
+            this.dbConnection.query(sql, [id], function(error, results, fields){
                 return res.status(200).send(results[0]);
              })
-             connection.commit();
+             this.dbConnection.commit();
         } catch (error) {
-            connection.rollback();
+            this.dbConnection.rollback();
             throw new Error("Erro com servidor", 500)
         }finally{
-            connection.end();
+            this.dbConnection.end();
         }
     }
 
     static createAnimal(req, res){
         const animalInfo = req.body;
-        const connection = CadAnimal.connect();
+        this.dbConnection = CadAnimal.connect();
 
-        connection.beginTransaction()
+        this.dbConnection.beginTransaction()
         try {
             const {nome, idade, porte, sexo, especie, data_resgate, nome_resgatante} = animalInfo;
             const parameters = [nome, idade, porte, sexo, especie, data_resgate, nome_resgatante];
         
             const sql = `CALL spCadAnimal(?,?,?,?,?,?,?)`; 
 
-            connection.query(sql, parameters, function(){
+            this.dbConnection.query(sql, parameters, function(){
                 return res.status(200).send({msg:"Animal cadastrado com sucesso"});
              });
-             connection.commit()
+             this.dbConnection.commit()
         } catch (error) {
-            connection.rollback()
+            this.dbConnection.rollback()
             throw new Error("Erro com servidor", 500)
         }finally{
-            connection.end();
+            this.dbConnection.end();
         }
     }
 
     static deleteAnimalById(req, res){
-        const connection = CadAnimal.connect();
+        this.dbConnection = CadAnimal.connect();
+
         const id = req.params.id;
-        connection.beginTransaction();
+
+        this.dbConnection.beginTransaction();
         try {
             const sql = `DELETE FROM animal where id = ${id}`;
-            connection.query(sql, function(){
+            this.dbConnection.query(sql, function(){
                 return res.status(200).send({msg:"Animal deletado com sucesso!"});
              })
-             connection.commit();
+             this.dbConnection.commit();
         } catch (error) {
-            connection.rollback();
+            this.dbConnection.rollback();
             throw new Error("Erro com servidor", 500)
         }finally{
-            connection.end();
+            this.dbConnection.end();
         }
     }
 
     static updateAnimal(req, res){
-        const connection = CadAnimal.connect();
+        this.dbConnection = CadAnimal.connect();
+
         const id = req.params.id;
         const {nome, idade, porte, sexo, especie, } = req.body;
 
@@ -115,16 +107,18 @@ class CadAnimal{
             }if(especie){
                 setStatementCollumns.push(`especie = '${especie}'`)
             }
+
             const sql = `UPDATE animal SET ${setStatementCollumns.join(",")} where id = ${id}`;
-            connection.query(sql, function(){
+            this.dbConnection.query(sql, function(){
                 return res.status(200).send({msg:"Registro do animal atualizado com sucesso!"});
             })
-            connection.commit()
+
+            this.dbConnection.commit()
         } catch (error) {
-            connection.rollback();
+            this.dbConnection.rollback();
             throw new Error("Erro no servidor", 500);
         }finally{
-            connection.end();
+            this.dbConnection.end();
         }         
     }
 }

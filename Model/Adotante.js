@@ -1,130 +1,120 @@
 const mysql = require('mysql');
-
+const Database = require('../Database/Database')
 class Adotante{
-    static connect(){
-        const connection = mysql.createConnection({
-            host:'bd2-ufvjm.mysql.database.azure.com',
-            user:'Mariano',
-            password:'m-88443244',
-            database:'ongAnimal',
-        });
-        connection.connect();
-        return connection;
-    }
-
+    
+    
     static getAllAdotantes(req,res){
-        const connection = Adotante.connect();
-        connection.beginTransaction();
+        this.dbConnection = Database.connect();
+        this.dbConnection.beginTransaction();
         try {
             const sql = "SELECT * FROM adotante";
-            connection.query(sql, function(error, results, fields){
+            this.dbConnection.query(sql, function(error, results, fields){
                 return res.status(200).send(results);
              })
-             connection.commit();
+             this.dbConnection.commit();
         } catch (error) {
-            connection.rollback();
+            this.dbConnection.rollback();
             throw new Error("Erro com servidor", 500)
         }finally{
-            connection.end();
+            this.dbConnection.end();
         }
     }
 
     static getAdotantesByCPF(req, res){
         const cpf = req.params.cpf;
-        const connection = Adotante.connect();
-        connection.beginTransaction();
+        this.dbConnection = Database.connect();
+        this.dbConnection.beginTransaction();
         try {
             const sql = `SELECT * FROM adotante where cpf = ${cpf}`;
-            connection.query(sql, function(error, results, fields){
+            this.dbConnection.query(sql, function(error, results, fields){
                 return res.status(200).send(results);
              })
-             connection.commit();
+             this.dbConnection.commit();
         } catch (error) {
-            connection.rollback();
+            this.dbConnection.rollback();
             throw new Error("Erro com servidor", 500)
         }finally{
-            connection.end();
+            this.dbConnection.end();
         }
-        console.log(cpf)
     }
 
     static createAdotante(req, res){
         const adotanteInfo = req.body;
-        const connection = Adotante.connect();
 
-        connection.beginTransaction();
+        this.dbConnection = Database.connect();
+        this.dbConnection.beginTransaction();
         try {
             const {cpf, nome, sobrenome, rua, cidade, estado, nCasa, telefone} = adotanteInfo;
         
             const sql = `INSERT INTO adotante ( cpf, nome, sobrenome, rua, cidade, estado, nCasa, telefone ) values ( ${cpf}, '${nome}', '${sobrenome}', '${rua}', '${cidade}','${estado}', ${nCasa}, '${telefone}')`; 
  
-            connection.query(sql, function(error, results, fields){
+            this.dbConnection.query(sql, function(error, results, fields){
                 return res.status(200).send(results);
              });
-             connection.commit()
+             this.dbConnection.commit()
         } catch (error) {
-            connection.rollback();
+            this.dbConnection.rollback();
             throw new Error("Erro com servidor", 500)
         }finally{
-            connection.end();
+            this.dbConnection.end();
         }
     }
 
     static deleteAdotantesByCPF(req, res){
         const cpf = req.params.cpf;
-        const connection = Adotante.connect();
-        connection.beginTransaction();
+        this.dbConnection = Database.connect();
+        this.dbConnection.beginTransaction();
+
         try {
             const sql = `Delete * FROM adotante where cpf = ${cpf}`;
-            connection.query(sql, function(error, results, fields){
+            this.dbConnection.query(sql, function(){
                 return res.status(200).send({msg:"Deletado com sucesso!"});
              })
-             connection.commit();
+             this.dbConnection.commit();
         } catch (error) {
-            connection.rollback();
+            this.dbConnection.rollback();
             throw new Error("Erro com servidor", 500)
         }finally{
-            connection.end();
+            this.dbConnection.end();
         }
     }
 
     static updateAdotante(req, res){
-        const connection = Adotante.connect();
+        this.dbConnection = Database.connect();
+        
         const cpf = req.params.cpf;
         const {nome, sobrenome, rua, cidade, estado, nCasa, telefone} = req.body;
-
+        
+        this.dbConnection.beginTransaction();
         try {
-            const setStatementCollumns = [] //copiei da Round, gostei.
+            const setStatementCollumns = []; 
 
             if(nome){
-                setStatementCollumns.push(`nome = '${nome}'`)
-            }
-            if(sobrenome){
-                setStatementCollumns.push(`sobrenome = '${sobrenome}'`)
-            }
-            if (rua) {
-                setStatementCollumns.push(`rua = '${rua}'`)
-            }
-            if(cidade){
-                setStatementCollumns.push(`cidade = '${cidade}'`)
+                setStatementCollumns.push(`nome = '${nome}'`);
+            }if(sobrenome){
+                setStatementCollumns.push(`sobrenome = '${sobrenome}'`);
+            }if (rua) {
+                setStatementCollumns.push(`rua = '${rua}'`);
+            }if(cidade){
+                setStatementCollumns.push(`cidade = '${cidade}'`);
             }if(estado){
-                setStatementCollumns.push(`estado = '${estado}'`)
+                setStatementCollumns.push(`estado = '${estado}'`);
             }if(nCasa){
-                setStatementCollumns.push(`nCasa = ${nCasa}`)
+                setStatementCollumns.push(`nCasa = ${nCasa}`);
             }if(telefone){
-                setStatementCollumns.push(`telefone = '${telefone}'`)
+                setStatementCollumns.push(`telefone = '${telefone}'`);
             }
 
             const sql = `UPDATE adotante SET ${setStatementCollumns.join(",")} where cpf = ${cpf}`;
-            connection.query(sql, function(){
+            this.dbConnection.query(sql, function(){
                 return res.status(200).send({msg:"Atualizado com sucesso!"});
             })
-            connection.commit()
+            this.dbConnection.commit()
         } catch (error) {
-            connection.rollback();
+            this.dbConnection.rollback();
             throw new Error("Erro no servidor", 500);
         }finally{
-            connection.end();
+            this.dbConnection.end();
         }         
     }
 }

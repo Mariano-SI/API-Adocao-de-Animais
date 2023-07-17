@@ -1,34 +1,22 @@
 const mysql = require('mysql');
+const Database = require('../Database/Database')
 
 class Admin{
-    //Função para conectar o BD
-    static connect(){
-        //Cria conexao
-        const connection = mysql.createConnection({
-            host:'bd2-ufvjm.mysql.database.azure.com',
-            user:'Mariano',
-            password:'m-88443244',
-            database:'ongAnimal',
-        });
-        //Conecta ao banco
-        connection.connect();
-        return connection;
-    }
-    //Retorna lista de carros
     static getAdmins(res){
-        const connection = Admin.connect();
-        connection.beginTransaction();
+        this.dbConnection = Database.connect();
+        this.dbConnection.beginTransaction();
+
         try {
             const sql = "select * from t_admin";
-            connection.query(sql, function(error, results, fields){
+            this.dbConnection.query(sql, function(error, results, fields){
                 return res.status(200).send(results);
             });
-            connection.commit();
+            this.dbConnection.commit();
         } catch (error) {
-            connection.rollback();
+            this.dbConnection.rollback();
             throw new Error("Erro com servidor", 500)
         }finally{
-            connection.end();
+            this.dbConnection.end();
         }
     }
 }
