@@ -65,7 +65,7 @@ class CadAnimal{
     static deleteAnimalById(req, res){
         this.dbConnection = Database.connect();
         const id = req.params.id;
-
+        
         this.dbConnection.beginTransaction();
         try {
             const sql = `CALL spDeleteAnimalById(?)`;
@@ -85,6 +85,9 @@ class CadAnimal{
 
         const id = req.params.id;
         const {nome, idade, porte, sexo, especie, } = req.body;
+        this.dbConnection = Database.connect();
+        
+        this.dbConnection.beginTransaction();
 
         try {
             const setStatementCollumns = [] 
