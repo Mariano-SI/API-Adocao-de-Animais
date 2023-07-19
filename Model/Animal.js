@@ -1,67 +1,118 @@
-//importa o modulo do mysql
-const mysql = require('mysql');
+const Database = require('../Database/Database');
 
 class CadAnimal {
-  //Função para conectar o BD
-  static connect() {
-    //Cria conexao
-    const connection = mysql.createConnection({
-      host: '127.0.0.1',
-      user: 'root',
-      password: '',
-      database: 'onganimal',
-    });
-    //Conecta ao banco
-    connection.connect();
-    return connection;
-  }
-  //Retorna lista de carros
-  static getAnimal(res) {
-    const connection = CadAnimal.connect();
-    connection.beginTransaction();
+  getAnimais(res) {
+    this.dbConnection = Database.connect();
+    this.dbConnection.beginTransaction();
+
     try {
       const sql = 'select * from animal';
-
-      const query = connection.query(sql, function (error, results, fields) {
-        if (error) throw error;
+      this.dbConnection.query(sql, function (error, results, fields) {
         return res.status(200).send(results);
       });
-      connection.commit();
+      this.dbConnection.commit();
     } catch (error) {
-      connection.rollback();
+      this.dbConnection.rollback();
       throw new Error('Não foi possivel concluir a transação', 500);
     } finally {
-      connection.end();
+      this.dbConnection.end();
     }
   }
 
-  //Retorna a lista de carros por tipo de banco de dado
-  static getAnimalById(id, callback) {
-    const connection = CadAnimal.connect();
+  getAnimalById(req, res) {
+    const id = req.params.id;
 
-    //Consulta
-    const sql = `select * from animal where animal.id = ${id}`;
-    const query = connection.query(sql, function (error, results, fields) {
-      if (error) throw error;
-      //Retorna os dados pela callback
-      callback(results);
-    });
-    console.log(query.sql);
-    connection.end();
+    this.dbConnection = Database.connect();
+    this.dbConnection.beginTransaction();
+
+    try {
+      const sql = `CALL spDadosAnimal(?)`;
+      this.dbConnection.query(sql, [id], function (error, results, fields) {
+        return res.status(200).send(results[0]);
+      });
+      this.dbConnection.commit();
+    } catch (error) {
+      this.dbConnection.rollback();
+      throw new Error('Erro com servidor', 500);
+    } finally {
+      this.dbConnection.end();
+    }
   }
 
-  //Atualiza o carro no BD
-  static updateAnimal(id, { nome, especie, porte, sexo, idade }, res) {
-    const connection = CadAnimal.connect();
-    connection.beginTransaction();
+  createAnimal(req, res) {
+    const animalInfo = req.body;
+    this.dbConnection = Database.connect();
+    this.dbConnection.beginTransaction();
+
     try {
-      const setStatementCollumns = []; //copiei da Round, gostei.
+      const {
+        nome,
+        idade,
+        porte,
+        sexo,
+        especie,
+        data_resgate,
+        nome_resgatante,
+      } = animalInfo;
+      const parameters = [
+        nome,
+        idade,
+        porte,
+        sexo,
+        especie,
+        data_resgate,
+        nome_resgatante,
+      ];
+
+      const sql = `CALL spCadAnimal(?,?,?,?,?,?,?)`;
+
+      this.dbConnection.query(sql, parameters, function () {
+        return res.status(200).send({ msg: 'Animal cadastrado com sucesso' });
+      });
+      this.dbConnection.commit();
+    } catch (error) {
+      this.dbConnection.rollback();
+      throw new Error('Erro com servidor', 500);
+    } finally {
+      this.dbConnection.end();
+    }
+  }
+
+  deleteAnimalById(req, res) {
+    this.dbConnection = Database.connect();
+    const id = req.params.id;
+
+    this.dbConnection.beginTransaction();
+    try {
+      const sql = `CALL spDeleteAnimalById(?)`;
+      this.dbConnection.query(sql, [id], function () {
+        return res.status(200).send({ msg: 'Animal deletado com sucesso!' });
+      });
+      this.dbConnection.commit();
+    } catch (error) {
+      this.dbConnection.rollback();
+      throw new Error('Erro com servidor', 500);
+    } finally {
+      this.dbConnection.end();
+    }
+  }
+
+  updateAnimal(req, res) {
+    this.dbConnection = Database.connect();
+    this.dbConnection.beginTransaction();
+    const id = req.params.id;
+    const { nome, idade, porte, sexo, especie, dataResgate, nomeResgatante } =
+      req.body;
+
+    try {
+      const setStatementCollumns = [];
+      const setStatementCollumnsResgate = [];
 
       if (nome) {
         setStatementCollumns.push(`nome = '${nome}'`);
       }
-      if (especie) {
-        setStatementCollumns.push(`especie = '${especie}'`);
+      if (idade) {
+        setStatementCollumns.push(`idade = ${idade}`);
       }
       if (porte) {
         setStatementCollumns.push(`porte = '${porte}'`);
@@ -69,39 +120,37 @@ class CadAnimal {
       if (sexo) {
         setStatementCollumns.push(`sexo = '${sexo}'`);
       }
-      if (idade) {
-        setStatementCollumns.push(`idade = ${idade}`);
+      if (especie) {
+        setStatementCollumns.push(`especie = '${especie}'`);
+      }
+      if (dataResgate) {
+        setStatementCollumnsResgate.push(`dataResgate = '${dataResgate}'`);
+      }
+      if (nomeResgatante) {
+        setStatementCollumnsResgate.push(
+          `nomeResgatante = '${nomeResgatante}'`,
+        );
       }
 
       const sql = `UPDATE animal SET ${setStatementCollumns.join(
         ',',
-      )} where id = ${id}`;
-      const query = connection.query(sql, function (error, results, fields) {
-        if (error) throw error;
-        return res.status(200).send(results);
+      )} where id = ${id};`;
+
+      console.log(sql);
+
+      this.dbConnection.query(sql, function () {
+        return res
+          .status(200)
+          .send({ msg: 'Registro do animal atualizado com sucesso!' });
       });
 
-      connection.commit();
+      this.dbConnection.commit();
     } catch (error) {
-      connection.rollback();
-      throw new Error('Erro com o servidor', 500);
+      this.dbConnection.rollback();
+      throw new Error('Erro no servidor', 500);
     } finally {
-      connection.end();
+      this.dbConnection.end();
     }
-  }
-
-  static createAnimal(animal, callback) {
-    const connection = CadAnimal.connect();
-    const { nome, especie, porte, sexo, idade } = animal;
-
-    const sql = `INSERT INTO animal ( nome, especie, porte, sexo, idade ) values ( '${nome}', '${especie}', '${porte}', '${sexo}', ${idade})`;
-    const query = connection.query(sql, function (error, results, fields) {
-      if (error) throw error;
-    });
-
-    console.log(query.sql);
-    connection.end();
-    callback();
   }
 }
 

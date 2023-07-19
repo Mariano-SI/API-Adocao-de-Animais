@@ -2,36 +2,20 @@ const express = require('express');
 const router = express.Router();
 const CadAnimal = require('../Model/Animal');
 
+const animaisMethods = new CadAnimal();
+
 router.get('/home', function (req, res) {
   res.status(200).send('API da Casa Quatro Patas');
 });
 
-//busca todos os animais
-router.get('/', function (req, res) {
-  CadAnimal.getAnimal(res);
-});
+router.get('/', (req, res) => animaisMethods.getAnimais(res));
 
-//busca animal por id
-router.get('/:id', function (req, res) {
-  const id = req.params.id;
-  CadAnimal.getAnimalById(id, function (animal) {
-    res.json(animal);
-  });
-});
+router.get('/:id', (req, res) => animaisMethods.getAnimalById(req, res));
 
-//post para salvar um animal
-router.post('/', function (req, res) {
-  const animal = req.body;
-  CadAnimal.createAnimal(animal, function (animal) {
-    res.json({ msg: 'Animal inserido com sucesso' });
-  });
-});
-//put para atualizar um animal
-router.put('/:id', function (req, res) {
-  const id = req.params.id;
-  const { nome, especie, porte, sexo, idade } = req.body;
+router.post('/', (req, res) => animaisMethods.createAnimal(req, res));
 
-  CadAnimal.updateAnimal(id, { nome, especie, porte, sexo, idade }, res);
-});
+router.delete('/:id', (req, res) => animaisMethods.deleteAnimalById(req, res));
+
+router.patch('/:id', (req, res) => animaisMethods.updateAnimal(req, res));
 
 module.exports = router;
