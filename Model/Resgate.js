@@ -2,11 +2,8 @@ const mysql = require('mysql');
 const Database = require('../Database/Database');
 
 class Resgate {
-  constructor() {
-    this.dbConnection = Database.connect();
-  }
-
   getAllResgates(req, res) {
+    this.dbConnection = Database.connect();
     this.dbConnection.beginTransaction();
     try {
       const sql = 'SELECT * FROM resgate';
@@ -23,9 +20,10 @@ class Resgate {
   }
 
   getResgateByidResgate(req, res) {
+    this.dbConnection = Database.connect();
+    this.dbConnection.beginTransaction();
     const idResgate = req.params.idResgate;
 
-    this.dbConnection.beginTransaction();
     try {
       const sql = `SELECT * FROM resgate WHERE resgate.idResgate  = ${idResgate}`;
       this.dbConnection.query(sql, function (error, results, fields) {
@@ -41,9 +39,9 @@ class Resgate {
   }
 
   createResgate(req, res) {
-    const resgateInfo = req.body;
-
+    this.dbConnection = Database.connect();
     this.dbConnection.beginTransaction();
+    const resgateInfo = req.body;
     try {
       const { dataResgate, idAnimal, nomeResgatante } = resgateInfo;
 

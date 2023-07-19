@@ -71,7 +71,8 @@ class Adotante {
 
     try {
       const sql = `CALL spDeleteAdotanteByID(?)`;
-      this.dbConnection.query(sql, [cpf], function () {
+      this.dbConnection.query(sql, cpf, function () {
+        console.log(res);
         return res.status(200).send({ msg: 'Deletado com sucesso!' });
       });
       this.dbConnection.commit();
