@@ -7,7 +7,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
 //rotas importadas de router
-app.use('/animais', require('./Routes/animalRoutes'));
+app.use('/', require('./Routes/animalRoutes'));
 app.use('/admin', require('./Routes/adminRoutes'));
 app.use('/adotantes', require('./Routes/adotanteRoutes'));
 app.use('/resgates', require('./Routes/resgateRoutes'));
