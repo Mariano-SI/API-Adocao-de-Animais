@@ -1,5 +1,6 @@
 const mysql = require('mysql');
 const Database = require('../Database/Database');
+const { format } = require('date-fns');
 
 class Resgate {
   getAllResgates(req, res) {
@@ -27,6 +28,14 @@ class Resgate {
     try {
       const sql = `SELECT * FROM resgate WHERE resgate.idResgate  = ${idResgate}`;
       this.dbConnection.query(sql, function (error, results, fields) {
+        if (error) {
+          throw new Error('Erro com servidor', 500);
+        }
+
+        results.map((item) => {
+          item.dataResgate = format(new Date(item.dataResgate), 'yyyy-MM-dd');
+        });
+
         return res.status(200).send(results);
       });
       this.dbConnection.commit();

@@ -1,4 +1,5 @@
 const Database = require('../Database/Database');
+const { format } = require('date-fns');
 
 class CadAnimal {
   getAnimais(res) {
@@ -28,6 +29,10 @@ class CadAnimal {
     try {
       const sql = `CALL spDadosAnimal(?)`;
       this.dbConnection.query(sql, [id], function (error, results, fields) {
+        results[0].map((item) => {
+          item.dResgate = format(new Date(item.dResgate), 'yyyy-MM-dd');
+        });
+
         return res.status(200).send(results[0]);
       });
       this.dbConnection.commit();
@@ -45,23 +50,16 @@ class CadAnimal {
     this.dbConnection.beginTransaction();
 
     try {
-      const {
-        nome,
-        idade,
-        porte,
-        sexo,
-        especie,
-        data_resgate,
-        nome_resgatante,
-      } = animalInfo;
+      const { nome, idade, porte, sexo, especie, dResgate, nResgate } =
+        animalInfo;
       const parameters = [
         nome,
         idade,
         porte,
         sexo,
         especie,
-        data_resgate,
-        nome_resgatante,
+        dResgate,
+        nResgate,
       ];
 
       const sql = `CALL spCadAnimal(?,?,?,?,?,?,?)`;
